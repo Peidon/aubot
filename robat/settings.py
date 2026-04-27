@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure-nw3==pfqo+g_tat)kyswuxak^nb5s0y)v00zj+x6ry-2t%6y*&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'aubot-api-622142662818.us-central1.run.app',
+    'aubot-api-tofvysnqjq-uc.a.run.app',
+]
 
 
 # Application definition
