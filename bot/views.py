@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .logic import batch_fields_mean
+from .logic import build_links
 from .models import Education, Experience, UserProfile
 
 
@@ -90,6 +91,26 @@ def _serialize_user_info(profile):
             )
         ],
     }
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def link_titles(request):
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Request body must be valid JSON."}, status=400)
+    source = payload.get("source")
+    target = payload.get("target")
+    if not isinstance(source, list) or not isinstance(target, list):
+        return JsonResponse({"error": "params must be an array."}, status=400)
+    return JsonResponse(
+        {
+            "message": "",
+            "result": build_links(source, target)
+        },
+        status=201,
+    )
 
 
 @csrf_exempt

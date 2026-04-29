@@ -5,6 +5,26 @@ from django.test import Client, TestCase
 
 from .models import Education, Experience, UserProfile
 
+
+class ClassifierTests(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.payload = {
+            "source": ["candidate education school", "full name"],
+            "target": ["first name", "last name", "school", "candidate company"]
+        }
+
+    def test_link_titles(self):
+        response = self.client.post(
+            "/link_titles",
+            data=json.dumps(self.payload),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201)
+        print(response.json())
+
+
 class UserInfoViewTests(TestCase):
     def setUp(self):
         self.client = Client()

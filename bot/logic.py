@@ -1,4 +1,5 @@
 import spacy
+from sentence_transformers import SentenceTransformer
 
 sentence_zer = "sentencizer"
 
@@ -8,8 +9,37 @@ class FieldClassifier:
         self.nlp = spacy.blank("en")
         if sentence_zer not in self.nlp.pipe_names:
             self.nlp.add_pipe(sentence_zer)
+        self.model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2",backend="onnx")
+
+    def similarities(self, source, target):
+        """
+        Connect source title with target title by calculating similarity
+        :param source: source titles (string list)
+        :param target: target titles (string, list)
+        :return: list [tuple(string, float)]
+        """
+        source_embeddings = self.model.encode(source)
+        target_embeddings = self.model.encode(target)
+        sim = self.model.similarity(source_embeddings, target_embeddings)
+        def select_target(scores):
+            max_value = 0.0
+            k = ""
+            for i, score in enumerate(scores):
+                v = score.item()
+                if v > max_value:
+                    max_value = v
+                    k = target[i]
+            return k, max_value
+
+        return [(select_target(scores)) for scores in sim]
+
 
     def meaningfulScore(self, text: str) -> int:
+        """
+        score text meaningful based sort of rules
+        :param text: string
+        :return: score
+        """
         text = (text or "").strip()
         if not text:
             return 0
@@ -126,3 +156,25 @@ def batch_fields_mean(fields):
         if fm:
            m[key] = val
     return m
+
+
+def build_links(source, target):
+    """
+    build connections from fields to titles
+    :param source: list(str)
+    :param target: list(str)
+    :return: list(str)
+    """
+    if not isinstance(source, list) or len(source) == 0:
+        return None
+    if not isinstance(target, list) or len(target) == 0:
+        return None
+    scores = classifier.similarities(source, target)
+
+    for i, score in enumerate(scores):
+        title, value = score
+        if value > 0.5:
+            source[i] = title
+    return source
+
+
