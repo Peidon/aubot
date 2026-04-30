@@ -144,17 +144,6 @@ def field_mean(field):
     }
 
 
-def batch_fields_mean(fields):
-    m = dict()
-    for field in fields:
-        fm = field_mean(field)
-        if fm:
-            key = fm.get("id")
-            val = fm.get("mean")
-            m[key] = val
-    return m
-
-
 def fields_source(fields):
     source = []
     for field in fields:

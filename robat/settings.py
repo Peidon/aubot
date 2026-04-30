@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'aubot-api-622142662818.us-central1.run.app',
     'aubot-api-tofvysnqjq-uc.a.run.app',
+    'localhost',
 ]
 
 
