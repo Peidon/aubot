@@ -11,7 +11,7 @@ class ClassifierTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.payload = {
-            "source": ["candidate education school", "full name"],
+            "source": [{"id":"01", "labels":["candidate education school", "school 123"]}],
             "target": ["first name", "last name", "school", "candidate company"]
         }
 

@@ -124,57 +124,82 @@ class FieldClassifier:
 classifier = FieldClassifier()
 
 def select_label(labels):
-    h_score = 0
-    candi = labels[0]
+    if len(labels) == 0:
+        return ""
+    h_score,candi = 0, labels[0]
     for label in labels:
         score = classifier.meaningfulScore(label)
         if score > h_score:
-            h_score = score
-            candi = label
+            h_score, candi = score, label
     return candi
 
 def field_mean(field):
     if not isinstance(field, dict):
         return None
-
-    labels = field.get("labels")
-    if len(labels) == 0:
-        return None
-
+    f_id, labels = field.get("id"),field.get("labels")
     mean = select_label(labels)
     return {
-        "id": field.get("id"),
+        "id": f_id,
         "mean": mean
     }
+
 
 def batch_fields_mean(fields):
     m = dict()
     for field in fields:
         fm = field_mean(field)
-        key = fm.get("id")
-        val = fm.get("mean")
         if fm:
-           m[key] = val
+            key = fm.get("id")
+            val = fm.get("mean")
+            m[key] = val
     return m
 
 
-def build_links(source, target):
+def fields_source(fields):
+    source = []
+    for field in fields:
+        fm = field_mean(field)
+        if not fm:
+            source.append("")
+        k = fm.get("id")
+        v = fm.get("mean")
+        if v:
+            source.append(v)
+        else:
+            source.append(k)
+    return source
+
+
+def build_mapper(fields, source):
+    m = dict()
+    for i, field in enumerate(fields):
+        k = field.get("id")
+        v = source[i]
+        m[k] = v
+    return m
+
+def build_links(fields, target):
     """
     build connections from fields to titles
-    :param source: list(str)
+    :param fields: list(object)
     :param target: list(str)
-    :return: list(str)
+    :return: dict(id, title)
     """
+    source = fields_source(fields)
     if not isinstance(source, list) or len(source) == 0:
         return None
-    if not isinstance(target, list) or len(target) == 0:
+    if not isinstance(target, list):
         return None
-    scores = classifier.similarities(source, target)
 
+    if len(target) == 0:
+        return build_mapper(fields, source)
+
+    scores = classifier.similarities(source, target)
     for i, score in enumerate(scores):
         title, value = score
         if value > 0.5:
             source[i] = title
-    return source
+
+    return build_mapper(fields, source)
 
 

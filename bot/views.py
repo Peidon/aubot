@@ -38,6 +38,11 @@ EXPERIENCE_REQUIRED_FIELDS = [
     "description",
 ]
 
+LINK_TITLE_PARAM_FIELDS = [
+    "id",
+    "labels"
+]
+
 
 def _missing_fields(data, required_fields):
     return [field for field in required_fields if not data.get(field)]
@@ -104,6 +109,19 @@ def link_titles(request):
     target = payload.get("target")
     if not isinstance(source, list) or not isinstance(target, list):
         return JsonResponse({"error": "params must be an array."}, status=400)
+    for index, field in enumerate(source):
+        if not isinstance(field, dict):
+            return JsonResponse({"error": f"field[{index}] must be an object"})
+        missing_fields = _missing_fields(field, LINK_TITLE_PARAM_FIELDS)
+        if missing_fields:
+            return JsonResponse(
+                {
+                    "error": f"field[{index}]  is missing required fields.",
+                    "missingFields": missing_fields,
+                },
+                status=400,
+            )
+
     return JsonResponse(
         {
             "message": "",
