@@ -9,7 +9,6 @@ from django.views.decorators.http import require_http_methods
 
 from .logic import build_links
 from .models import Education, Experience, UserProfile
-from .middleware import RequestLoggingMiddleware
 
 
 DATE_FORMAT = "%d-%m-%Y"
@@ -100,7 +99,6 @@ def _serialize_user_info(profile):
 
 @csrf_exempt
 @require_http_methods(["POST"])
-@RequestLoggingMiddleware
 def link_titles(request):
     try:
         payload = json.loads(request.body)

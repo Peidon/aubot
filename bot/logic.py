@@ -22,13 +22,11 @@ class FieldClassifier:
         target_embeddings = self.model.encode(target)
         sim = self.model.similarity(source_embeddings, target_embeddings)
         def select_target(scores):
-            max_value = 0.0
-            k = ""
+            k, max_value = "", 0.0
             for i, score in enumerate(scores):
                 v = score.item()
                 if v > max_value:
-                    max_value = v
-                    k = target[i]
+                    k, max_value = target[i], v
             return k, max_value
 
         return [(select_target(scores)) for scores in sim]
@@ -133,11 +131,20 @@ def select_label(labels):
             h_score, candi = score, label
     return candi
 
+import logging
+from logging.handlers import RotatingFileHandler
+
+logging.basicConfig(level=logging.INFO)
+handler = RotatingFileHandler("info.log", maxBytes=512000)
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+
 def field_mean(field):
     if not isinstance(field, dict):
         return None
     f_id, labels = field.get("id"),field.get("labels")
     mean = select_label(labels)
+    logger.info(f"{labels} -> {mean}")
     return {
         "id": f_id,
         "mean": mean
