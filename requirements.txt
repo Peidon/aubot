@@ -2,3 +2,5 @@ Django~=5.2.13
 django-cors-headers~=4.8
 spacy~=3.8.14
 sentence-transformers[onnx]
+numpy>=1.24.0
+scikit-learn>=1.3.0
