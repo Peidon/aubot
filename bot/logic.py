@@ -152,6 +152,11 @@ def field_mean(field):
 
 
 def fields_source(fields):
+    """
+
+    :param fields: Dictionary Mapping field id -> labels (List of text phrases)
+    :return: List of Text, indicate meaning of each field
+    """
     source = []
     for field in fields:
         fm = field_mean(field)

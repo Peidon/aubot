@@ -1,10 +1,10 @@
 import unittest
 from clustering import semantic_cluster
-from text_processor import extract_primary_meaning
+from text_processor import extract_representative, Recognizer
 
 class RecognizerTests(unittest.TestCase):
     def setUp(self):
-        # self.recognizer = Recognizer()
+        self.recognizer = Recognizer()
         self.primary_mean_test_cases = [
             ['job title', 'work experience', 'job title', 'work experience'],
             ['school name', 'education',  'school name', 'school or university', 'education', 'education', 'delete'],
@@ -20,10 +20,14 @@ class RecognizerTests(unittest.TestCase):
             ['work experience', 'role description', 'role', 'description', 'description', 'from', 'i', 'currently', 'work', 'here', 'location', 'work', 'experience', 'experience']
         ]
 
-    def test_extract_primary_meaning(self):
-        for phrases in self.primary_mean_test_cases:
-            result = extract_primary_meaning(phrases)
-            print(f"{phrases}\n→ {result}\n")
+    # def test_extract_primary_meaning(self):
+        # for phrases in self.primary_mean_test_cases:
+        #     result = extract_primary_meaning(phrases)
+        #     print(f"{phrases}\n→ {result}\n")
+
+    def test_extract_representative(self):
+        result = extract_representative(self.primary_mean_test_cases)
+        print(f"{result}")
 
 
 

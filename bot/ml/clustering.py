@@ -7,50 +7,7 @@ import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 from typing import List, Dict
 
-
-def get_embeddings(texts: List[str], model: str = "sentence-transformers") -> np.ndarray:
-    """
-    Generate embeddings for text phrases.
-
-    Args:
-        texts: List of text phrases to embed
-        model: Embedding model to use ("sentence-transformers" or "openai")
-
-    Returns:
-        numpy array of shape (n_texts, embedding_dim)
-    """
-    if model == "sentence-transformers":
-        # Using sentence-transformers (requires: pip install sentence-transformers)
-        try:
-            from sentence_transformers import SentenceTransformer
-            embedder = SentenceTransformer('all-MiniLM-L6-v2')  # Fast, good quality
-            embeddings = embedder.encode(texts)
-            return embeddings
-        except ImportError:
-            print("sentence-transformers not installed. Install with: pip install sentence-transformers")
-            raise
-
-    elif model == "openai":
-        # Using OpenAI embeddings (requires: pip install openai)
-        try:
-            from openai import OpenAI
-            client = OpenAI()  # Requires OPENAI_API_KEY environment variable
-
-            embeddings = []
-            for text in texts:
-                response = client.embeddings.create(
-                    input=text,
-                    model="text-embedding-3-small"
-                )
-                embeddings.append(response.data[0].embedding)
-
-            return np.array(embeddings)
-        except ImportError:
-            print("openai not installed. Install with: pip install openai")
-            raise
-
-    else:
-        raise ValueError(f"Unknown model: {model}. Choose 'sentence-transformers' or 'openai'")
+from bot.ml.text_processor import recognizer
 
 
 def compute_correlation_matrix(embeddings: np.ndarray) -> np.ndarray:
@@ -139,7 +96,7 @@ def semantic_cluster(
     # Step 1: Generate embeddings
     if verbose:
         print(f"Step 1: Generating embeddings for {len(texts)} texts using {model}...")
-    embeddings = get_embeddings(texts, model=model)
+    embeddings = recognizer.embeddings(texts)
 
     # Step 2: Compute correlation matrix
     if verbose:
