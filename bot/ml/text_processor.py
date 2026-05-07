@@ -1,7 +1,7 @@
 import math
 import re
 from pathlib import Path
-from typing import List, Dict, Optional, Set
+from typing import List, Dict
 
 import onnxruntime as ort
 import numpy as np
@@ -13,39 +13,7 @@ def tokenize(phrase):
     tokens = set(phrase.split())
     return tokens - stop_words
 
-
-def cluster_phrases(phrases):
-    """Group phrases by shared tokens"""
-    clusters = []
-    used = set()
-
-    for i, phrase in enumerate(phrases):
-        if i in used:
-            continue
-
-        tokens_i = tokenize(phrase)
-        cluster = [phrase]
-        used.add(i)
-
-        # Find similar phrases (share >50% of tokens)
-        for j, other_phrase in enumerate(phrases[i + 1:], start=i + 1):
-            if j in used:
-                continue
-
-            tokens_j = tokenize(other_phrase)
-            overlap = len(tokens_i & tokens_j)
-            min_size = min(len(tokens_i), len(tokens_j))
-
-            if overlap > 0 and overlap / min_size >= 0.5:
-                cluster.append(other_phrase)
-                used.add(j)
-
-        clusters.append(cluster)
-
-    return clusters
-
-
-stop_words = {'a', 'an', 'the', 'is', 'or', 'of', 'in', 'to'}
+stop_words = {'a', 'an', 'the', 'is', 'or', 'of', 'in', 'on', 'from', 'to'}
 
 def score_cluster(cluster):
     """Score based on: cluster size + total information content"""
@@ -59,19 +27,6 @@ def score_cluster(cluster):
     token_score = len(all_tokens)
 
     return size_score + token_score
-
-
-def select_representative(docs: List[List[str]], phrases: List[str]) -> str:
-    """Choose the most descriptive phrase from the cluster"""
-
-    # Heuristics (in priority order):
-    mx_score, best = 0, ""
-    text = " ".join(phrases)
-    for phrase in phrases:
-        tokens = tokenize(phrase)
-        token_score = sum([text.count(token) for token in tokens])
-
-    return best
 
 
 class Recognizer:
@@ -268,49 +223,58 @@ def semantic_cluster(
     return cluster_results
 
 
-def extract_primary(phrases: List[str]) -> List[str]:
-    # Step 1: Clean
-    cleaned = []
+def cleaned_text(phrases: List[str]) -> List[str]:
+    cleaned = set()
     for phrase in phrases:
         phrase = phrase.lower().strip()
         phrase = re.sub(r'\b\d+\b', '', phrase)
         phrase = re.sub(r'\s+', ' ', phrase).strip()
-        if phrase:
-            cleaned.append(phrase)
+        if phrase and phrase not in stop_words:
+            cleaned.add(phrase)
 
-    if not cleaned:
-        return []
+    return list(cleaned)
 
-    # Step 2: Cluster
-    clusters = semantic_cluster(cleaned,n_clusters=2)
 
-    # Step 3: Pick best cluster
+def extract_primary(phrases: List[str]) -> List[str]:
+    # Step 1: Cluster
+    clusters = semantic_cluster(phrases,distance_threshold=0.7)
+
+    print(f"{phrases} -> {clusters.values()}")
+    # Step 2: Pick best cluster
     return max(clusters.values(), key=score_cluster)
 
 
-def extract_representative(docs: List[List[str]]) -> List[str]:
-    docs = [extract_primary(doc) for doc in docs]
+def select_representative(docs: List[List[str]]) -> List[str]:
+    docs = [cleaned_text(doc) for doc in docs]
+    # cluster = extract_primary([phrase for phrases in docs for phrase in phrases])
     texts = [" ".join(phrases) for phrases in docs]
     result = []
+    token_score = dict()
     for i, phrases in enumerate(docs):
 
         highest_score, best_phrase = 0, ""
 
+        # token score
+        def tf_idf(tok):
+            if tok in token_score:
+                return token_score[tok]
+            # times of term appears in phrases
+            appears = texts[i].count(tok)
+            if len(docs) == 1:
+                return appears / len(phrases)
+            # numbers of documents contains token
+            numbers = sum([1 for text in texts if tok in text])
+
+            tf_score = appears / len(phrases) * math.log(len(docs) / numbers)
+            token_score[tok] = tf_score
+            return tf_score
+
         for phrase in phrases:
             tokens = tokenize(phrase)
-
-            # token score
-            def tf_idf(to):
-                # times of term appears in phrases
-                appears = texts[i].count(to)
-                # numbers of documents contains token
-                numbers = sum([1 for text in texts if to in text])
-                return appears / len(phrases) * math.log(len(docs) / numbers)
-
             score = sum([tf_idf(token) for token in tokens])
+            # log(f"{phrase} -> {score}")
             if score > highest_score:
-                highest_score = score
-                best_phrase = phrase
+                highest_score, best_phrase = score, phrase
 
         result.append(best_phrase)
 

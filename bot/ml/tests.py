@@ -1,6 +1,6 @@
 import unittest
 from clustering import semantic_cluster
-from text_processor import extract_representative, Recognizer
+from text_processor import select_representative, Recognizer
 
 class RecognizerTests(unittest.TestCase):
     def setUp(self):
@@ -19,6 +19,7 @@ class RecognizerTests(unittest.TestCase):
             ['are you awaiting the hearing of charges in a civil or criminal court of law', 'yes', 'no', 'question 34354'],
             ['work experience', 'role description', 'role', 'description', 'description', 'from', 'i', 'currently', 'work', 'here', 'location', 'work', 'experience', 'experience']
         ]
+        self.case0 =  [['candidate education school', 'school or university']]
 
     # def test_extract_primary_meaning(self):
         # for phrases in self.primary_mean_test_cases:
@@ -26,8 +27,14 @@ class RecognizerTests(unittest.TestCase):
         #     print(f"{phrases}\n→ {result}\n")
 
     def test_extract_representative(self):
-        result = extract_representative(self.primary_mean_test_cases)
+        result = select_representative(self.case0)
         print(f"{result}")
+
+    def test_similarities(self):
+        source = ["candidate education school", "candidate last name"]
+        target = ["first name", "last name", "school", "candidate company"]
+        result = self.recognizer.similarities(source, target)
+        print(result)
 
 
 
@@ -48,12 +55,13 @@ class ClusteringTestCase(unittest.TestCase):
             'address',
             'responsibilities',
             'workplace',
-            'career history'
+            'career history',
+            'skills', 'type', 'to', 'add'
         ]
 
         clusters = semantic_cluster(
             job_fields,
-            distance_threshold=0.4,
+            distance_threshold=0.7,
             model="sentence-transformers"
         )
 
@@ -77,7 +85,7 @@ class ClusteringTestCase(unittest.TestCase):
 
         clusters2 = semantic_cluster(
             mixed_fields,
-            distance_threshold=0.45,
+            distance_threshold=0.7,
             model="sentence-transformers"
         )
 
