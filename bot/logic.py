@@ -17,7 +17,10 @@ def fields_source(fields) -> List[str]:
     :return: List of Text, indicate meaning of each field
     """
     docs = [field.get("labels") for field in fields]
-    return select_representative(docs)
+    reps = select_representative(docs)
+    for texts, represent in zip(docs, reps):
+        logger.info(f"{texts} -> {represent}")
+    return reps
 
 
 def build_mapper(fields, source):
