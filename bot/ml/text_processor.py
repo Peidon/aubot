@@ -253,6 +253,7 @@ def select_representative(docs: List[List[str]]) -> List[str]:
     for i, phrases in enumerate(docs):
 
         highest_score, best_phrase = 0, ""
+        topic_score, topic_phrase = 0, ""
 
         # token score
         def tf_idf(tok):
@@ -269,12 +270,23 @@ def select_representative(docs: List[List[str]]) -> List[str]:
             token_score[tok] = tf_score
             return tf_score
 
+        def topic(tok):
+            numbers = sum([1 for text in texts if tok in text])
+            return numbers / len(docs)
+
         for phrase in phrases:
             tokens = tokenize(phrase)
             score = sum([tf_idf(token) for token in tokens])
             # log(f"{phrase} -> {score}")
             if score > highest_score:
                 highest_score, best_phrase = score, phrase
+            topic_sc = sum([topic(token) for token in tokens])
+            if topic_sc > topic_score:
+                topic_score, topic_phrase = topic_sc, phrase
+
+        if len(docs) > 0 and len(best_phrase.split()) <= 5 and best_phrase != topic_phrase:
+            best_phrase = f"{topic_phrase} {best_phrase}"
+
 
         result.append(best_phrase)
 

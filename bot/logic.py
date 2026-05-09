@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from bot.ml.text_processor import recognizer, select_representative
 
 import logging
@@ -17,19 +17,15 @@ def fields_source(fields) -> List[str]:
     :return: List of Text, indicate meaning of each field
     """
     docs = [field.get("labels") for field in fields]
-    reps = select_representative(docs)
-    for texts, represent in zip(docs, reps):
-        logger.info(f"{texts} -> {represent}")
-    return reps
+    return select_representative(docs)
 
 
-def build_mapper(fields, source):
-    m = dict()
-    for i, field in enumerate(fields):
-        k = field.get("id")
-        v = source[i]
-        m[k] = v
-    return m
+def build_mapper(fields, source) -> Dict[str, str]:
+    mapper = dict()
+    for field, represent in zip(fields, source):
+        logger.info(f'{field.get("labels")} -> {represent}')
+        mapper[field.get("id")] = represent
+    return mapper
 
 def build_links(fields, target):
     """
@@ -50,7 +46,8 @@ def build_links(fields, target):
     scores = recognizer.similarities(source, target)
     for i, score in enumerate(scores):
         title, value = score
-        if value > 0.5:
+        alpha = ((len(title.split()) + len(source[i].split()))>>2) * 0.125 + 1.0
+        if value * alpha > 0.7:
             source[i] = title
 
     return build_mapper(fields, source)
