@@ -249,7 +249,6 @@ def select_representative(docs: List[List[str]]) -> List[str]:
     # cluster = extract_primary([phrase for phrases in docs for phrase in phrases])
     texts = [" ".join(phrases) for phrases in docs]
     result = []
-    token_score = dict()
     for i, phrases in enumerate(docs):
 
         highest_score, best_phrase = 0, ""
@@ -257,8 +256,6 @@ def select_representative(docs: List[List[str]]) -> List[str]:
 
         # token score
         def tf_idf(tok):
-            if tok in token_score:
-                return token_score[tok]
             # times of term appears in phrases
             appears = texts[i].count(tok)
             if len(docs) == 1:
@@ -267,7 +264,6 @@ def select_representative(docs: List[List[str]]) -> List[str]:
             numbers = sum([1 for text in texts if tok in text])
 
             tf_score = appears / len(phrases) * math.log(len(docs) / numbers)
-            token_score[tok] = tf_score
             return tf_score
 
         def topic(tok):
