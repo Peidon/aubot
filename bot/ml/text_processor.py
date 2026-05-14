@@ -13,7 +13,7 @@ def tokenize(phrase):
     tokens = set(phrase.split())
     return tokens - stop_words
 
-stop_words = {'a', 'an', 'the', 'is', 'or', 'of', 'in', 'on', 'from', 'to'}
+stop_words = {'a', 'an', 'the', 'is', 'or', 'of', 'in', 'on'}
 
 def score_cluster(cluster):
     """Score based on: cluster size + total information content"""
@@ -223,14 +223,24 @@ def semantic_cluster(
     return cluster_results
 
 
+def sort_by_len(phrases: List[str]) -> List[str]:
+    objs = [Phrase(item) for item in phrases]
+    objs.sort(key=lambda x: x.size, reverse=True)
+    return [obj.text for obj in objs]
+
+
 def cleaned_text(phrases: List[str]) -> List[str]:
     cleaned = set()
-    for phrase in phrases:
+    for phrase in sort_by_len(phrases):
         phrase = phrase.lower().strip()
         phrase = re.sub(r'\b\d+\b', '', phrase)
         phrase = re.sub(r'\s+', ' ', phrase).strip()
         if phrase and phrase not in stop_words:
-            cleaned.add(phrase)
+            for other in cleaned:
+                if phrase in other:
+                    break
+            else:
+                cleaned.add(phrase)
 
     return list(cleaned)
 
@@ -244,6 +254,30 @@ def extract_primary(phrases: List[str]) -> List[str]:
     return max(clusters.values(), key=score_cluster)
 
 
+def jaccard_similarity(phrase_a: str, phrase_b: str) -> float:
+    # Normalize text to lowercase and split into sets of unique words
+    set_a = set(phrase_a.lower().split())
+    set_b = set(phrase_b.lower().split())
+
+    # Handle the edge case of two empty input strings
+    if not set_a and not set_b:
+        return 1.0
+
+    # Calculate overlap and total unique words
+    intersection = set_a.intersection(set_b)
+    union = set_a.union(set_b)
+
+    # Divide shared words by total unique words
+    return len(intersection) / len(union)
+
+
+class Phrase:
+    def __init__(self, text: str, score: float=0.0):
+        self.text = text
+        self.score = score
+        self.size = len(text.split())
+
+
 def select_representative(docs: List[List[str]]) -> List[str]:
     docs = [cleaned_text(doc) for doc in docs]
     # cluster = extract_primary([phrase for phrases in docs for phrase in phrases])
@@ -251,8 +285,9 @@ def select_representative(docs: List[List[str]]) -> List[str]:
     result = []
     for i, phrases in enumerate(docs):
 
-        highest_score, best_phrase = 0, ""
-        topic_score, topic_phrase = 0, ""
+        # highest_score, best_phrase = 0, ""
+        # topic_score, topic_phrase = 0, ""
+        parts = []
 
         # token score
         def tf_idf(tok):
@@ -266,23 +301,36 @@ def select_representative(docs: List[List[str]]) -> List[str]:
             tf_score = appears / len(phrases) * math.log(len(docs) / numbers)
             return tf_score
 
-        def topic(tok):
-            numbers = sum([1 for text in texts if tok in text])
-            return numbers / len(docs)
+        # def topic(tok):
+        #     numbers = sum([1 for text in texts if tok in text])
+        #     return numbers / len(docs)
 
         for phrase in phrases:
             tokens = tokenize(phrase)
             score = sum([tf_idf(token) for token in tokens])
-            # log(f"{phrase} -> {score}")
-            if score > highest_score:
-                highest_score, best_phrase = score, phrase
-            topic_sc = sum([topic(token) for token in tokens])
-            if topic_sc > topic_score:
-                topic_score, topic_phrase = topic_sc, phrase
+            parts.append(Phrase(phrase, score))
+            # if score > highest_score:
+            #     highest_score, best_phrase = score, phrase
+            # topic_sc = sum([topic(token) for token in tokens])
+            # if topic_sc > topic_score:
+            #     topic_score, topic_phrase = topic_sc, phrase
 
-        if len(docs) > 0 and len(best_phrase.split()) <= 5 and best_phrase != topic_phrase:
-            best_phrase = f"{topic_phrase} {best_phrase}"
+        # if len(docs) > 0 and len(best_phrase.split()) <= 5 and best_phrase != topic_phrase:
+        #     best_phrase = f"{topic_phrase} {best_phrase}"
 
+        if not parts:
+            result.append("")
+            continue
+
+        parts.sort(key=lambda x: x.score, reverse=True)
+        best_phrase = parts[0].text
+
+        if len(parts) > 1 and len(best_phrase.split()) < 5:
+            for part in parts[1:]:
+                jac = jaccard_similarity(best_phrase, part.text)
+                if 0.2 <= jac < 1.0:
+                    best_phrase += "," + part.text
+                    break
 
         result.append(best_phrase)
 

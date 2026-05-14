@@ -6,9 +6,9 @@ class RecognizerTests(unittest.TestCase):
     def setUp(self):
         self.recognizer = Recognizer()
         self.primary_mean_test_cases = [
-            ['school name', 'education',  'school name', 'school or university', 'education', 'education', 'delete'],
-            ['search', 'education',  'field of study', 'field of study'],
-            ['search', 'skills', 'type to add skills'],
+            ['school name', 'education', 'school or university'],
+            ['education', 'field of study'],
+            ['skills', 'type to add skills'],
             ['job title', 'work experience'],
             ['company name', 'work experience', 'company'],
             ['work experience', 'start date', 'date section month', 'input', 'month', 'from', 'current value is mm','yyyy'],
