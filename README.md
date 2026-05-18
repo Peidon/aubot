@@ -13,8 +13,8 @@ Aubot
 
 Key features
 --
-Enter once, it can automatically populate the same fields in future interactions.  
+Enter information once, and it can automatically populate the same fields in future interactions.  
 
-- **Simple**, no need to login and create account, no LLM token cost, just install extension and click buttons.
-- **Fast**, use a light NLP model, response time less than 500 ms. I use LLM to handle offline tasks, so it's smart and fast.  
-- **Secure**, data store at your local file. I don't collect your any personal information.
+- **Simple** -- No login or account creation required. No LLM token costs. Just install the extension and click buttons.
+- **Fast**, -- The system uses a lightweight NLP model, with response times under 500 ms. LLMs are only used for offline tasks, making the experience both smart and fast.  
+- **Secure** -- Your data is stored locally on your device. I do not collect any personal information.
