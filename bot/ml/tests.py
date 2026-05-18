@@ -27,8 +27,8 @@ class RecognizerTests(unittest.TestCase):
             print(f"{represent}")
 
     def test_similarities(self):
-        source = ["web address", "school", "legal first name"]
-        target = ["first name", "last name", "school or university", "company name", "address"]
+        source = ["what is your expected annual salary", "what is your current annual salary", "What are your remuneration expectations in relation to this role"]
+        target = ["what are your salary expectations"]
         result = self.recognizer.similarities(source, target)
         print(result)
 
