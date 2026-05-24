@@ -4,6 +4,7 @@ from datetime import datetime
 
 from django.db import transaction
 from django.http import JsonResponse
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -95,6 +96,18 @@ def _serialize_user_info(profile):
             )
         ],
     }
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def index(_):
+    return HttpResponse("Hi, I'm Aubot!")
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_icon(_):
+    return HttpResponse('<link rel="icon" href="docs/aubot.svg" type="image/x-icon">')
 
 
 @csrf_exempt

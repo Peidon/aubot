@@ -1,4 +1,4 @@
-Aubot
+Aubot Assistant
 =========
 
 [![Docker Image CI](https://github.com/Peidon/aubot/actions/workflows/docker-image.yml/badge.svg?branch=master)](https://github.com/Peidon/aubot/actions/workflows/docker-image.yml)
