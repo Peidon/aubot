@@ -7,9 +7,20 @@ Aubot Assistant
 <img src="docs/Aubot.gif" width="200" height="200" />
 </p>
 
+How to use it ?
+--
 
-| How to use it, see [the guidebook](https://github.com/Peidon/kit/blob/master/internal/form-bot/guidebook.md). |
-|---------------------------------------------------------------------------------------------------------------|
+Run the container
+
+```commandline
+docker build -t aubot_server .
+docker run --rm -p 8000:8000 aubot_server
+```
+
+Use the browser extension
+
+| See [the guidebook](https://github.com/Peidon/kit/blob/master/internal/form-bot/guidebook.md). |
+|------------------------------------------------------------------------------------------------|
 
 Key features
 --
