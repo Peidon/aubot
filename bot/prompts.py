@@ -1,8 +1,6 @@
 from bs4 import BeautifulSoup
 from openai.types.chat import ChatCompletionSystemMessageParam, ChatCompletionDeveloperMessageParam
 
-
-
 prompt = """
 This is the html text:
 ```

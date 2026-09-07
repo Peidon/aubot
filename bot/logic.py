@@ -1,11 +1,8 @@
 from typing import List, Dict
 from bot.ml.text_processor import recognizer, select_representative
 
+from bot.utils import handler
 import logging
-from logging.handlers import RotatingFileHandler
-
-logging.basicConfig(level=logging.INFO)
-handler = RotatingFileHandler("info.log", maxBytes=512000)
 logger = logging.getLogger(__name__)
 logger.addHandler(handler)
 

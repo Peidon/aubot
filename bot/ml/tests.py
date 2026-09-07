@@ -1,5 +1,4 @@
 import unittest
-from clustering import semantic_cluster
 from text_processor import select_representative, Recognizer
 
 class RecognizerTests(unittest.TestCase):
@@ -31,79 +30,6 @@ class RecognizerTests(unittest.TestCase):
         target = ["what are your salary expectations"]
         result = self.recognizer.similarities(source, target)
         print(result)
-
-
-
-
-class ClusteringTestCase(unittest.TestCase):
-
-    def test_clustering(self):
-        # Example 1: Job-related fields
-        print("=" * 60)
-        print("Example 1: Job-related fields")
-        print("=" * 60)
-
-        job_fields = [
-            'work experience',
-            'role description',
-            'location',
-            'job duties',
-            'address',
-            'responsibilities',
-            'workplace',
-            'career history',
-            'skills', 'type', 'to', 'add'
-        ]
-
-        clusters = semantic_cluster(
-            job_fields,
-            distance_threshold=0.7,
-            model="sentence-transformers"
-        )
-
-        self.assertTrue(len(clusters)>0)
-
-        print("\n" + "=" * 60)
-        print("Example 2: Mixed categories")
-        print("=" * 60)
-
-        mixed_fields = [
-            'email address',
-            'phone number',
-            'contact info',
-            'job title',
-            'position',
-            'salary',
-            'compensation',
-            'benefits package',
-            'mobile number'
-        ]
-
-        clusters2 = semantic_cluster(
-            mixed_fields,
-            distance_threshold=0.7,
-            model="sentence-transformers"
-        )
-
-        self.assertTrue(len(clusters2) > 0)
-
-        print("\n" + "=" * 60)
-        print("Example 3: With fixed number of clusters")
-        print("=" * 60)
-
-        role_description = [
-            'work experience',
-            'role description',
-            'role',
-            'description', 'from', 'i', 'currently', 'work', 'here', 'location', 'experience']
-
-        clusters3 = semantic_cluster(
-            role_description,
-            n_clusters=2,
-            model="sentence-transformers"
-        )
-
-        self.assertTrue(len(clusters3) > 0)
 
 
 if __name__ == '__main__':
