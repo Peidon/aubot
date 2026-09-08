@@ -24,19 +24,6 @@ def load_words():
 
     return valid_words
 
-def score_cluster(cluster):
-    """Score based on: cluster size + total information content"""
-    size_score = len(cluster) * 2  # Prefer larger clusters
-
-    # Total unique tokens across all phrases
-    all_tokens = set()
-    for phrase in cluster:
-        all_tokens.update(tokenize(phrase))
-
-    token_score = len(all_tokens)
-
-    return size_score + token_score
-
 
 class Recognizer:
 
@@ -119,7 +106,7 @@ class Recognizer:
         # pooled = np.sum(token_embeddings * attention_mask, axis=1)
         # pooled /= np.maximum(np.sum(attention_mask, axis=1), 1e-9)
         #
-        # norms = np.linalg.norm(pooled, axis=1, keepdims=True)
+        # norms = np.linalg.norm(pooled, axis=1)
         # return (pooled / np.maximum(norms, 1e-12)).astype(np.float32)
 
 
@@ -175,12 +162,11 @@ def sort_by_len(phrases: List[str]) -> List[str]:
     return [obj.text for obj in objs]
 
 
-def cleaned_phrase(phrase: str) -> str:
-    new_p = []
+def valid_phrase(phrase: str) -> bool:
     for word in phrase.split(' '):
         if word in recognizer.words:
-            new_p.append(word)
-    return ' '.join(new_p)
+            return True
+    return False
 
 def cleaned_text(phrases: List[str]) -> List[str]:
     cleaned = set()
@@ -188,7 +174,8 @@ def cleaned_text(phrases: List[str]) -> List[str]:
         phrase = phrase.lower().strip()
         phrase = re.sub(r'\b\d+\b', '', phrase)
         phrase = re.sub(r'\s+', ' ', phrase).strip()
-        phrase = cleaned_phrase(phrase)
+        if not valid_phrase(phrase):
+            continue
         if phrase and phrase not in stop_words:
             for other in cleaned:
                 if phrase in other:
