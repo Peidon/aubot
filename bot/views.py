@@ -121,14 +121,14 @@ def link_titles(request):
     target = payload.get("target")
     if not isinstance(source, list) or not isinstance(target, list):
         return JsonResponse({"error": "params must be an array."}, status=400)
-    for index, field in enumerate(source):
+    for idx, field in enumerate(source):
         if not isinstance(field, dict):
-            return JsonResponse({"error": f"field[{index}] must be an object"})
+            return JsonResponse({"error": f"field[{idx}] must be an object"})
         missing_fields = _missing_fields(field, LINK_TITLE_PARAM_FIELDS)
         if missing_fields:
             return JsonResponse(
                 {
-                    "error": f"field[{index}]  is missing required fields.",
+                    "error": f"field[{idx}]  is missing required fields.",
                     "missingFields": missing_fields,
                 },
                 status=400,

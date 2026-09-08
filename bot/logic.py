@@ -43,8 +43,7 @@ def build_links(fields, target):
     scores = recognizer.similarities(source, target)
     for i, score in enumerate(scores):
         title, value = score
-        alpha = ((len(title.split()) + len(source[i].split()))>>2) * 0.125 + 1.0
-        if value * alpha > 0.7:
+        if value > 0.9:
             source[i] = title
 
     return build_mapper(fields, source)
