@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+import ipaddress
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,9 +29,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
-    '192.168.0.0/24'
+    '127.0.0.1'
 ]
 
+# Define your local network subnet
+LOCAL_SUBNET = '192.168.0.0/24'
+
+# Dynamically add all host IPs from that subnet
+ALLOWED_HOSTS.extend([str(ip) for ip in ipaddress.IPv4Network(LOCAL_SUBNET).hosts()])
 
 # Application definition
 
