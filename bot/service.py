@@ -20,7 +20,7 @@ def fields_source(fields) -> List[str]:
 def build_mapper(fields, source) -> Dict[str, str]:
     mapper = dict()
     for field, represent in zip(fields, source):
-        logger.info(f'{field.get("labels")} -> {represent}')
+        logger.info(f'{",".join(field.get("labels"))} -> {represent}')
         mapper[field.get("id")] = represent
     return mapper
 

@@ -1,0 +1,122 @@
+[
+    {
+        "model_name": "gpt-6-astra",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 436,
+        "requests": 1,
+        "idx": 0
+    },
+    {
+        "model_name": "gpt-5.6-sol",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 1
+    },
+    {
+        "model_name": "gpt-5.6-terra",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 2
+    },
+    {
+        "model_name": "gpt-5.6-luna",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 3
+    },
+    {
+        "model_name": "gpt-4o-mini",
+        "token_limit": 200000,
+        "req_limit": 500,
+        "token_usage": 20331,
+        "requests": 3,
+        "idx": 4
+    },
+    {
+        "model_name": "gpt-4.1-mini",
+        "token_limit": 200000,
+        "req_limit": 500,
+        "token_usage": 366,
+        "requests": 1,
+        "idx": 5
+    },
+    {
+        "model_name": "gpt-5.4-mini",
+        "token_limit": 200000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 6
+    },
+    {
+        "model_name": "gpt-5.4-nano",
+        "token_limit": 200000,
+        "req_limit": 500,
+        "token_usage": 353,
+        "requests": 1,
+        "idx": 7
+    },
+    {
+        "model_name": "gpt-5-mini",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 1782,
+        "requests": 1,
+        "idx": 8
+    },
+    {
+        "model_name": "gpt-5.5",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 9
+    },
+    {
+        "model_name": "gpt-5.4",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 10
+    },
+    {
+        "model_name": "gpt-5.2",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 11
+    },
+    {
+        "model_name": "gpt-5.1",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 12
+    },
+    {
+        "model_name": "gpt-5",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 13
+    },
+    {
+        "model_name": "gpt-5.6-luna",
+        "token_limit": 500000,
+        "req_limit": 500,
+        "token_usage": 0,
+        "requests": 0,
+        "idx": 14
+    }
+]

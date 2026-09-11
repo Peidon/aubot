@@ -28,7 +28,7 @@ class Knowledge(BaseModel):
 
 # It automatically looks for the OPENAI_API_KEY environment variable
 client = OpenAI(
-    base_url="http://192.168.0.16:8080/v1",
+    base_url="http://192.168.0.7:8080/v1",
     api_key="sk-no-key-required"
 )
 
