@@ -6,6 +6,7 @@ import numpy as np
 import json
 import urllib.request
 
+from bot.agent.tailor import tailor
 from bot.utils import handler
 import logging
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class Recognizer:
         self.words = load_words()
         self.embedding_endpoint = "http://"+os.environ.get("embedding_ip", "localhost")+":8080/embed"
 
+        #curl -X POST http://0.0.0:8080/embed -H "Content-Type: application/json" -d '{"text": "Embedding testing."}'
         # model_dir = Path(__file__).resolve().parent / "onnx_model"
         #
         # self.tokenizer = AutoTokenizer.from_pretrained(
@@ -45,9 +47,9 @@ class Recognizer:
 
     def embeddings(self, texts: List[str]) -> np.ndarray:
         """
-        curl -X POST http://0.0.0:8080/embed -H "Content-Type: application/json" -d '{"text": "Embedding testing."}'
-        :param texts:
-        :return:
+        Get embeddings for phrase or sentence.
+        :param texts: sentences
+        :return: 2d-embeddings
         """
         if not texts:
             return np.empty((0, 0), dtype=np.float32)
@@ -55,6 +57,10 @@ class Recognizer:
         token_embeddings = np.zeros(shape=(len(texts), 384),dtype=np.float32)
 
         for i, text in enumerate(texts):
+            if not text:
+                token_embeddings[i] = np.zeros(shape=(1, 384), dtype=np.float32)
+                continue
+
             data = {"text": text}
             # Encode the payload to bytes
             encoded_data = json.dumps(data).encode(encoding="utf-8")
@@ -175,6 +181,7 @@ def cleaned_text(phrases: List[str]) -> List[str]:
         phrase = re.sub(r'\b\d+\b', '', phrase)
         phrase = re.sub(r'\s+', ' ', phrase).strip()
         if not valid_phrase(phrase):
+            cleaned.add("")
             continue
         if phrase and phrase not in stop_words:
             for other in cleaned:
@@ -208,6 +215,26 @@ class Phrase:
         self.text = text
         self.score = score
         self.size = len(text.split())
+
+
+def generate_query(docs: List[List[str]]) -> str:
+    prompt = ""
+    for i, texts in enumerate(docs):
+        if not texts:
+            continue
+        prompt += "{0}.{1}\n".format(i,",".join(texts))
+    return prompt
+
+
+def generate_titles(docs: List[List[str]]) -> List[str]:
+    docs = [cleaned_text(doc) for doc in docs]
+    query = generate_query(docs)
+    logger.info("query:{}".format(query))
+    mapper = tailor(query)
+    titles = [""] * len(docs)
+    for i in range(len(titles)):
+        titles[i] = mapper[i]
+    return titles
 
 
 def select_representative(docs: List[List[str]]) -> List[str]:

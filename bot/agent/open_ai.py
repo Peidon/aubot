@@ -31,18 +31,21 @@ def deserialize_model(dct):
 
 from pathlib import Path
 due_log = Path("due.log")
+llm_pool = Path("llm_pool.json")
+llm_list,due_set = list(), set()
 
-if due_log:
+if due_log.is_file():
     with open("due.log", "r",encoding="utf-8") as file:
         due = file.read()
     due_set = set(due.split("\n"))
 
-with open("llm_pool.json", "r") as file:
-    llm_list = json.load(file, object_hook=deserialize_model)
-    if not isinstance(llm_list, list):
-        raise ValueError("load llm list error.")
+if llm_pool.is_file():
+    with open("llm_pool.json", "r") as file:
+        llm_list = json.load(file, object_hook=deserialize_model)
+        if not isinstance(llm_list, list):
+            raise ValueError("load llm list error.")
 
-def LM() -> LLM:
+def LM() -> LLM | None:
     models= [m for m in llm_list if m.model_name not in due_set]
     if not models:
         raise ValueError("No models available.")
@@ -54,10 +57,11 @@ def update_due(lm: LLM, token_cost: int):
     llm_list[lm.idx].requests += 1
     if lm.token_usage >= (lm.token_limit * 0.95) or lm.requests >= (lm.req_limit * 0.95):
         due_set.add(lm.model_name)
-        with open("due.log", "a") as log_file:
-            log_file.write("{}\n".format(lm.model_name))
+        with open("due.log", "a") as due_log_file:
+            due_log_file.write("{}\n".format(lm.model_name))
 
-def update_usages():
+def update_usages(lm: LLM, token_cost: int):
+    update_due(lm, token_cost)
     with open("llm_pool.json", "w") as lm_file:
         json.dump(llm_list, lm_file, default=serialize_model, indent=4)
 
