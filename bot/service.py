@@ -36,7 +36,7 @@ def build_links(fields, target):
     :return: dict(id, title)
     """
     source = source_titles(fields)
-    logger.info(f'source titles:\n {",".join(source)}')
+    logger.info("source titles:\n {}".format("\n".join(source)))
     if not isinstance(source, list) or len(source) == 0:
         return None
     if not isinstance(target, list):
