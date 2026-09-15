@@ -220,9 +220,10 @@ class Phrase:
 def generate_query(docs: List[List[str]]) -> str:
     prompt = ""
     for i, texts in enumerate(docs):
-        if not texts:
+        phrases = [text for text in texts if text]
+        if not phrases:
             continue
-        prompt += "{0}.{1}\n".format(i,",".join(texts))
+        prompt += "{0}.{1}\n".format(i,",".join(phrases))
     return prompt
 
 
@@ -234,7 +235,8 @@ def generate_titles(docs: List[List[str]]) -> List[str]:
     mapper = tailor(query)
     titles = [""] * len(docs)
     for i in range(len(titles)):
-        titles[i] = mapper[i]
+        if i in mapper:
+            titles[i] = mapper[i]
     return titles
 
 
