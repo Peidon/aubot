@@ -6,7 +6,6 @@ import numpy as np
 import json
 import urllib.request
 
-from bot.agent.tailor import tailor
 from bot.utils import handler
 import logging
 logger = logging.getLogger(__name__)
@@ -31,6 +30,7 @@ class Recognizer:
     def __init__(self):
         self.words = load_words()
         self.embedding_endpoint = "http://"+os.environ.get("embedding_ip", "localhost")+":8080/embed"
+        self.embedding_dimension = 768
 
         #curl -X POST http://0.0.0:8080/embed -H "Content-Type: application/json" -d '{"text": "Embedding testing."}'
         # model_dir = Path(__file__).resolve().parent / "onnx_model"
@@ -54,11 +54,11 @@ class Recognizer:
         if not texts:
             return np.empty((0, 0), dtype=np.float32)
 
-        token_embeddings = np.zeros(shape=(len(texts), 384),dtype=np.float32)
+        token_embeddings = np.zeros(shape=(len(texts), self.embedding_dimension),dtype=np.float32)
 
         for i, text in enumerate(texts):
             if not text:
-                token_embeddings[i] = np.zeros(shape=(1, 384), dtype=np.float32)
+                token_embeddings[i] = np.zeros(shape=(1, self.embedding_dimension), dtype=np.float32)
                 continue
 
             data = {"text": text}
@@ -227,6 +227,7 @@ def generate_query(docs: List[List[str]]) -> str:
 
 
 def generate_titles(docs: List[List[str]]) -> List[str]:
+    from bot.agent.tailor import tailor
     docs = [cleaned_text(doc) for doc in docs]
     query = generate_query(docs)
     logger.info("query:{}".format(query))

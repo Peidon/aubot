@@ -36,7 +36,7 @@ def build_links(fields, target):
     :return: dict(id, title)
     """
     source = source_titles(fields)
-    logger.info("source titles:\n {}".format("\n".join(source)))
+    logger.info("source titles:\n{}".format("\n".join(source)))
     if not isinstance(source, list) or len(source) == 0:
         return None
     if not isinstance(target, list):
@@ -49,7 +49,7 @@ def build_links(fields, target):
     for i, score in enumerate(scores):
         title, value = score
         logger.info(f'{title} -> {value}')
-        if value > 0.95:
+        if value > 0.8:
             source[i] = title
 
     return build_mapper(fields, source)

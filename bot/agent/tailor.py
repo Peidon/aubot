@@ -58,34 +58,3 @@ def tailor(docs:str) -> Dict[int, str]:
 
     parsed = completion.choices[0].message.parsed
     return dict([(entity.sequence_no,entity.title) for entity in parsed.entities])
-
-
-if __name__ == '__main__':
-
-    texts = """
-1.company name,work experience
-2.location,work experience
-3.work experience,i currently work here
-4.date section month,work experience,from,start date,input
-5.date section year,work experience,from,input,start date
-6.date section month,work experience,to,input,end date
-7.date section year,work experience,input,to,end date
-8.role description,work experience
-9.school name,school or university,education
-10.education,field of study
-11.,education,overall result,grade average
-12.education,date section year,from,input,first year attended
-13.actual or expected,education,date section year,last year attended,to,input
-14.school name,school or university,education
-15.education,field of study
-16.,education,overall result,grade average
-17.education,date section year,from,input,first year attended
-18.actual or expected,education,date section year,last year attended,to,input
-19.type to add skills
-20.web address,
-21.linked in account,social network accounts
-    """
-
-    d = tailor(texts)
-    for k,v in d.items():
-        print(k, ".", v)
