@@ -231,7 +231,7 @@ def generate_titles(docs: List[List[str]]) -> List[str]:
     from bot.agent.tailor import tailor
     docs = [cleaned_text(doc) for doc in docs]
     query = generate_query(docs)
-    logger.info("query:{}".format(query))
+    logger.info("query:\n{}".format(query))
     mapper = tailor(query)
     titles = [""] * len(docs)
     for i in range(len(titles)):

@@ -14,35 +14,31 @@ This is a list of texts extracted from a html page:
 ```
 {}
 ```
-For each line, it's a serial of labels or attributes for a html element,
-sequence number represents the element,and implies the position on the html page.
+For each line, it's a serial of texts around a input box,
+sequence number represents the input box,and implies it's position on the html page.
 """
 
 class Element(BaseModel):
-    sequence_no: int = Field(description="The sequence number of the element")
-    title: str = Field(description="The title of the text that html element displays."
-                                   "It should be a phrase of concise description,"
-                                   "and indicates the relation to other elements in the same topic")
+    sequence_no: int = Field(description="The sequence number of the input box")
+    title: str = Field(description="The title of the input box, it's a name or question contains context."
+                                   "It should be a phrase or sentence, which doesn't contain special characters, "
+                                   "and indicates the relation to other input boxs in the same topic")
 
 class View(BaseModel):
     entities: list[Element]
-    topic: str=Field(description="The topic of the html page")
+    topic: str=Field(description="The topics web page includes, split by comma")
 
 
 
 # model_url = os.environ.get("MODEL_URL")
 
 # It automatically looks for the OPENAI_API_KEY environment variable
-client = OpenAI(
-    # base_url=model_url,
-    # api_key="sk-no-key-required"
-    # api_key=os.environ.get("OPENAI_API_KEY")
-)
+client = OpenAI()
 
 
 def tailor(docs:str) -> Dict[int, str]:
     system_msg = ChatCompletionSystemMessageParam(role="system",
-                                                  content="Recognize the topic of the whole page, and generate title for each element.")
+                                                  content="Tidy up information from web page")
     dev_message = ChatCompletionDeveloperMessageParam(role="developer", content=prompt.format(docs))
     lm = LM()
     logger.info(f'call {lm.model_name}')
@@ -50,6 +46,8 @@ def tailor(docs:str) -> Dict[int, str]:
         model=lm.model_name,
         messages=[system_msg, dev_message],
         response_format=View,
+        temperature=0.0,
+        seed=42
     )
 
     if not completion or len(completion.choices) == 0:
