@@ -1,10 +1,13 @@
 import math
 import os
 import re
+from pathlib import Path
 from typing import List
+import onnxruntime as ort
 import numpy as np
-import json
-import urllib.request
+from transformers import AutoTokenizer
+# import json
+# import urllib.request
 
 from bot.utils import handler
 import logging
@@ -29,21 +32,54 @@ class Recognizer:
 
     def __init__(self):
         self.words = load_words()
-        self.embedding_endpoint = "http://"+os.environ.get("embedding_ip", "localhost")+":8080/embed"
-        self.embedding_dimension = 768
+        # self.embedding_endpoint = "http://"+os.environ.get("embedding_ip", "localhost")+":8080/embed"
+        # self.embedding_dimension = 768
 
-        #curl -X POST http://0.0.0:8080/embed -H "Content-Type: application/json" -d '{"text": "Embedding testing."}'
-        # model_dir = Path(__file__).resolve().parent / "onnx_model"
-        #
-        # self.tokenizer = AutoTokenizer.from_pretrained(
-        #     model_dir.as_posix(),
-        #     local_files_only=True,
-        # )
-        # self.session = ort.InferenceSession(
-        #     (model_dir / "model.onnx").as_posix(),
-        #     providers=["CPUExecutionProvider"],
-        # )
-        # self.input_names = {input_meta.name for input_meta in self.session.get_inputs()}
+        model_dir = Path(__file__).resolve().parent
+
+        self.tokenizer = AutoTokenizer.from_pretrained(model_dir.as_posix(), local_files_only=True)
+        self.session = ort.InferenceSession(
+            (model_dir / "model.onnx").as_posix(),
+            providers=["CPUExecutionProvider"],
+        )
+        self.input_names = {input_meta.name for input_meta in self.session.get_inputs()}
+
+    # curl -X POST http://0.0.0:8080/embed -H "Content-Type: application/json" -d '{"text": "Embedding testing."}'
+    # token_embeddings = np.zeros(shape=(len(texts), self.embedding_dimension),dtype=np.float32)
+    #
+    # for i, text in enumerate(texts):
+    #     if not text:
+    #         token_embeddings[i] = np.zeros(shape=(1, self.embedding_dimension), dtype=np.float32)
+    #         continue
+    #
+    #     data = {"text": text}
+    #     # Encode the payload to bytes
+    #     encoded_data = json.dumps(data).encode(encoding="utf-8")
+    #
+    #     # Create the POST request with the required headers
+    #     req = urllib.request.Request(
+    #         self.embedding_endpoint,
+    #         data=encoded_data,
+    #         headers={"Content-Type": "application/json"},
+    #         method="POST",
+    #     )
+    #
+    #     try:
+    #         # Send the request and process the response
+    #         with urllib.request.urlopen(req) as response:
+    #             response_body = response.read().decode("utf-8")
+    #
+    #             # Parse the JSON response
+    #             response_json = json.loads(response_body)
+    #
+    #             # Extract the float array
+    #             embedding = response_json.get("embedding", [])
+    #
+    #             token_embeddings[i]=embedding
+    #     except Exception as e:
+    #         logger.error(f"HTTP Request failed: {e}")
+    #
+    # return token_embeddings
 
     def embeddings(self, texts: List[str]) -> np.ndarray:
         """
@@ -53,67 +89,31 @@ class Recognizer:
         """
         if not texts:
             return np.empty((0, 0), dtype=np.float32)
+        encoded = self.tokenizer(
+            texts,
+            padding=True,
+            truncation=True,
+            return_tensors="np",
+        )
 
-        token_embeddings = np.zeros(shape=(len(texts), self.embedding_dimension),dtype=np.float32)
+        ort_inputs = {}
+        for input_name in self.input_names:
+            if input_name in encoded:
+                ort_inputs[input_name] = encoded[input_name].astype(np.int64)
+            elif input_name == "token_type_ids":
+                ort_inputs[input_name] = np.zeros_like(
+                    encoded["input_ids"],
+                    dtype=np.int64,
+                )
 
-        for i, text in enumerate(texts):
-            if not text:
-                token_embeddings[i] = np.zeros(shape=(1, self.embedding_dimension), dtype=np.float32)
-                continue
+        token_embeddings = self.session.run(None, ort_inputs)[0]
+        attention_mask = encoded["attention_mask"].astype(np.float32)[..., None]
 
-            data = {"text": text}
-            # Encode the payload to bytes
-            encoded_data = json.dumps(data).encode(encoding="utf-8")
+        pooled = np.sum(token_embeddings * attention_mask, axis=1)
+        pooled /= np.maximum(np.sum(attention_mask, axis=1), 1e-9)
 
-            # Create the POST request with the required headers
-            req = urllib.request.Request(
-                self.embedding_endpoint,
-                data=encoded_data,
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-
-            try:
-                # Send the request and process the response
-                with urllib.request.urlopen(req) as response:
-                    response_body = response.read().decode("utf-8")
-
-                    # Parse the JSON response
-                    response_json = json.loads(response_body)
-
-                    # Extract the float array
-                    embedding = response_json.get("embedding", [])
-
-                    token_embeddings[i]=embedding
-            except Exception as e:
-                logger.error(f"HTTP Request failed: {e}")
-
-        return token_embeddings
-        # encoded = self.tokenizer(
-        #     texts,
-        #     padding=True,
-        #     truncation=True,
-        #     return_tensors="np",
-        # )
-        #
-        # ort_inputs = {}
-        # for input_name in self.input_names:
-        #     if input_name in encoded:
-        #         ort_inputs[input_name] = encoded[input_name].astype(np.int64)
-        #     elif input_name == "token_type_ids":
-        #         ort_inputs[input_name] = np.zeros_like(
-        #             encoded["input_ids"],
-        #             dtype=np.int64,
-        #         )
-        #
-        # token_embeddings = self.session.run(None, ort_inputs)[0]
-        # attention_mask = encoded["attention_mask"].astype(np.float32)[..., None]
-        #
-        # pooled = np.sum(token_embeddings * attention_mask, axis=1)
-        # pooled /= np.maximum(np.sum(attention_mask, axis=1), 1e-9)
-        #
-        # norms = np.linalg.norm(pooled, axis=1)
-        # return (pooled / np.maximum(norms, 1e-12)).astype(np.float32)
+        norms = np.linalg.norm(pooled, axis=1)
+        return (pooled / np.maximum(norms[:, None], 1e-12)).astype(np.float32)
 
 
     def similarities(self, source, target):
@@ -141,25 +141,25 @@ class Recognizer:
         ]
 
 recognizer = Recognizer()
-
-def compute_correlation_matrix(embeddings: np.ndarray) -> np.ndarray:
-    """
-    Compute correlation matrix between embeddings.
-
-    Args:
-        embeddings: numpy array of shape (n_texts, embedding_dim)
-
-    Returns:
-        Correlation matrix of shape (n_texts, n_texts)
-    """
-    # Normalize embeddings to unit vectors
-    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-    normalized_embeddings = embeddings / norms
-
-    # Correlation is cosine similarity for normalized vectors
-    correlation_matrix = np.dot(normalized_embeddings, normalized_embeddings.T)
-
-    return correlation_matrix
+#
+# def compute_correlation_matrix(embeddings: np.ndarray) -> np.ndarray:
+#     """
+#     Compute correlation matrix between embeddings.
+#
+#     Args:
+#         embeddings: numpy array of shape (n_texts, embedding_dim)
+#
+#     Returns:
+#         Correlation matrix of shape (n_texts, n_texts)
+#     """
+#     # Normalize embeddings to unit vectors
+#     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+#     normalized_embeddings = embeddings / norms
+#
+#     # Correlation is cosine similarity for normalized vectors
+#     correlation_matrix = np.dot(normalized_embeddings, normalized_embeddings.T)
+#
+#     return correlation_matrix
 
 
 def sort_by_len(phrases: List[str]) -> List[str]:

@@ -4,3 +4,5 @@ torch~=2.11.0
 numpy>=1.24.0
 openai~=3.6.0
 pydantic~=2.12.5
+onnxruntime~=1.30.0
+transformers~=5.17.0
