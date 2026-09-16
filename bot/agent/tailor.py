@@ -20,13 +20,14 @@ sequence number represents the input box,and implies it's position on the html p
 
 class Element(BaseModel):
     sequence_no: int = Field(description="The sequence number of the input box")
-    title: str = Field(description="The title of the input box, it's a name or question contains context."
-                                   "It should be a phrase or sentence, which doesn't contain special characters, "
-                                   "and indicates the relation to other input boxs in the same topic")
+    topic: str = Field(description="The topic of the input box on the web page")
+    title: str = Field(description="The title of the input box, it's a name or question."
+                                   "It should be a phrase or sentence, which doesn't contain special characters."
+                                   "It should contain complete meaning so it's able to be identified without referring to context.")
 
 class View(BaseModel):
     entities: list[Element]
-    topic: str=Field(description="The topics web page includes, split by comma")
+    topics: str=Field(description="The topics web page includes, split by comma")
 
 
 
@@ -55,4 +56,6 @@ def tailor(docs:str) -> Dict[int, str]:
     update_usages(lm, completion.usage.total_tokens)
 
     parsed = completion.choices[0].message.parsed
+    for entity in parsed.entities:
+        print(entity.sequence_no, ">>", entity.topic)
     return dict([(entity.sequence_no,entity.title) for entity in parsed.entities])
