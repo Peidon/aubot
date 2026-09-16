@@ -57,5 +57,5 @@ def tailor(docs:str) -> Dict[int, str]:
 
     parsed = completion.choices[0].message.parsed
     for entity in parsed.entities:
-        print(entity.sequence_no, ">>", entity.topic)
+        logger.info(entity.sequence_no, ">>", entity.topic)
     return dict([(entity.sequence_no,entity.title) for entity in parsed.entities])
