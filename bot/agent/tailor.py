@@ -14,16 +14,16 @@ This is a list of texts extracted from a html page:
 ```
 {}
 ```
-For each line, it's a serial of texts around a input box,
-sequence number represents the input box,and implies it's position on the html page.
+For each line, sequence number represents a input box, and implies its order on the html page,
+the following texts are positioned around the input box.
+Input boxes have the same topic are positioned in the same section.
+Generate a title for each input field, the title allows each input field to be identified individually.
 """
 
 class Element(BaseModel):
     sequence_no: int = Field(description="The sequence number of the input box")
     topic: str = Field(description="The topic of the input box on the web page")
-    title: str = Field(description="The title of the input box, it's a name or question."
-                                   "It should be a phrase or sentence, which doesn't contain special characters."
-                                   "It should contain complete meaning so it's able to be identified without referring to context.")
+    title: str = Field(description="The title of the input box, it's a name or question,doesn't contain punctuation or special characters.")
 
 class View(BaseModel):
     entities: list[Element]
@@ -57,5 +57,5 @@ def tailor(docs:str) -> Dict[int, str]:
 
     parsed = completion.choices[0].message.parsed
     for entity in parsed.entities:
-        logger.info(entity.sequence_no, ">>", entity.topic)
+        logger.info(f'{entity.sequence_no} >> {entity.topic}')
     return dict([(entity.sequence_no,entity.title) for entity in parsed.entities])
