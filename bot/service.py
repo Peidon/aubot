@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.addHandler(handler)
 
-key = os.environ.get("OPENAI_API_KEY")
+key = os.environ.get("GEMINI_API_KEY")
 
 def source_titles(fields) -> List[str]:
     """
