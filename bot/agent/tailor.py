@@ -70,6 +70,6 @@ def tailor(docs:str) -> Dict[int, str]:
 
     parsed = View.model_validate_json(interaction.output_text)
 
-    for entity in parsed.entities:
-        logger.info(f'{entity.sequence_no} >> {entity.topic}')
-    return dict([(entity.sequence_no,entity.title) for entity in parsed.entities])
+    # for entity in parsed.entities:
+    #     logger.info(f'{entity.sequence_no} >> {entity.topic}')
+    return dict([(entity.sequence_no,"{0} ({1})".format(entity.title, entity.topic)) for entity in parsed.entities])
