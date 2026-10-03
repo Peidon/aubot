@@ -1,4 +1,3 @@
-from typing import Dict
 from pydantic import BaseModel, Field
 from google import genai
 # from openai.types.chat import ChatCompletionSystemMessageParam, ChatCompletionDeveloperMessageParam
