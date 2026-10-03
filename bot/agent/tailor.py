@@ -38,7 +38,7 @@ client = genai.Client()
 # client = OpenAI()
 
 
-def tailor(docs:str) -> Dict[int, str]:
+def tailor(docs:str) -> list[Element]:
     # lm = LM()
     # system_msg = ChatCompletionSystemMessageParam(role="system",
     #                                               content="Tidy up information from web page")
@@ -69,7 +69,4 @@ def tailor(docs:str) -> Dict[int, str]:
     )
 
     parsed = View.model_validate_json(interaction.output_text)
-
-    # for entity in parsed.entities:
-    #     logger.info(f'{entity.sequence_no} >> {entity.topic}')
-    return dict([(entity.sequence_no,"{0} ({1})".format(entity.title, entity.topic)) for entity in parsed.entities])
+    return parsed.entities

@@ -232,7 +232,16 @@ def generate_titles(docs: List[List[str]]) -> List[str]:
     docs = [cleaned_text(doc) for doc in docs]
     query = generate_query(docs)
     logger.info("query:\n{}".format(query))
-    mapper = tailor(query)
+    elements = tailor(query)
+    mapper = dict()
+    for element in elements:
+        s = recognizer.similarities([element.title], [element.topic])
+        mapper[element.sequence_no] = element.title
+        if s[0][1] > 0.6:
+            mapper[element.sequence_no] += " ({})".format(element.topic)
+        else:
+            logger.info("title = {0}, topic = {1}".format(element.title, element.topic))
+
     titles = [""] * len(docs)
     for i in range(len(titles)):
         if i in mapper:
