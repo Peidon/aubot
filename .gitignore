@@ -5,3 +5,5 @@ __pycache__
 **.onnx
 **.json
 **.txt
+**.png
+**.pt
